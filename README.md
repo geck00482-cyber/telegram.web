@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Telegram Web</title>
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box;
@@ -15,6 +15,7 @@
         align-items: center;
         min-height: 100vh;
         padding: 20px;
+        overflow: hidden; /* Убирает скролл самого окна браузера */
     }
 
     /* ================= КАРТОЧКА ВХОДА ================= */
@@ -196,6 +197,12 @@
         padding: 10px 18px; background: #fff;
         border-bottom: 1px solid #e6ebee;
     }
+    .back-btn {
+        display: none; /* Показываем только на телефоне */
+        background: transparent; border: none;
+        font-size: 20px; color: #707579;
+        cursor: pointer; margin-right: 4px;
+    }
     .chat-panel-header .chat-name { font-size: 15px; }
     .chat-panel-header .status { font-size: 13px; color: #707579; margin-top: 1px; }
 
@@ -204,7 +211,7 @@
         display: flex; flex-direction: column; gap: 8px;
     }
     .msg {
-        max-width: 70%; padding: 8px 12px; border-radius: 12px;
+        max-width: 75%; padding: 8px 12px; border-radius: 12px;
         font-size: 14px; line-height: 1.4; word-wrap: break-word;
         position: relative; animation: pop 0.2s ease;
     }
@@ -247,16 +254,34 @@
     }
     .send-btn:hover { background: #2b7cd3; }
 
-    /* --- Адаптив --- */
+    /* ================= МОБИЛЬНАЯ ВЕРСИЯ ================= */
     @media (max-width: 700px) {
-        body { padding: 0; }
+        body { padding: 0; background: #fff; }
+        
+        /* Экран входа */
+        .card {
+            max-width: 100%; height: 100vh;
+            border-radius: 0; box-shadow: none;
+            display: flex; flex-direction: column; justify-content: center;
+        }
+
+        /* Экран чатов */
         .app {
             max-width: 100%; height: 100vh; max-height: none;
-            border-radius: 0; grid-template-columns: 1fr;
+            border-radius: 0; box-shadow: none;
+            grid-template-columns: 1fr;
         }
-        .sidebar { display: none; }
+
+        .sidebar { display: none; width: 100%; }
         .sidebar.show { display: flex; }
-        .chat-panel.hide { display: none; }
+
+        .chat-panel { display: none; width: 100%; }
+        .chat-panel.show { display: flex; }
+
+        .back-btn { display: block; }
+        
+        .chat-panel-header { padding: 10px 14px; }
+        .composer { padding: 10px 14px; }
     }
 </style>
 </head>
@@ -329,6 +354,9 @@
     <!-- Правая колонка -->
     <div class="chat-panel" id="chat-panel">
         <div class="chat-panel-header">
+            <!-- Кнопка назад для телефона -->
+            <button class="back-btn" onclick="backToChats()">←</button>
+            
             <div class="avatar" id="header-avatar">?</div>
             <div>
                 <div class="chat-name" id="header-name">Выберите чат</div>
@@ -346,12 +374,12 @@
 <script>
     /* ================= ДАННЫЕ ЧАТОВ ================= */
     const chats = [
-        { id: 5, name: 'Женя Киселев', color: '#e5a54b', letter: 'Ж',
+        { id: 6, name: 'Илья Бруй', color: '#65aadd', letter: 'И',
           messages: [
-              { out: false, text: 'я пишу как дела там у тебя с Викой ?', time: '13:40' },
-              { out: false, text: 'да все ахуено вот скоро будем чпок чпок', time: '13:41' },
-              { out: true,  text: 'ты конечно молодец а как же Кира', time: '13:42' },
-              { out: false, text: 'я бы во все отверстия ее', time: '13:43' },
+              { out: true,  text: 'Папа привет, как дела, что делаешь?', time: '14:10' },
+              { out: false, text: 'Все хорошо сын. Я на работе.', time: '14:15' },
+              { out: true,  text: 'Понятно, я вот сайт создал.', time: '14:16' },
+              { out: false, text: 'Красавчик сын.', time: '14:20' },
           ]},
         { id: 1, name: 'Анна Смирнова', color: '#e17076', letter: 'А',
           messages: [
@@ -364,7 +392,7 @@
               { out: false, text: 'Совещание в 15:00', time: '10:00' },
               { out: true,  text: 'Понял, буду', time: '10:01' },
           ]},
-        { id: 3, name: 'Дмитрий', color: '#65aadd', letter: 'Д',
+        { id: 3, name: 'Дмитрий', color: '#e5a54b', letter: 'Д',
           messages: [
               { out: true,  text: 'Скинь файл, пожалуйста', time: '09:20' },
               { out: false, text: 'Сейчас отправлю', time: '09:22' },
@@ -393,6 +421,8 @@
     const chatListEl = document.getElementById('chat-list');
     const messagesEl = document.getElementById('messages');
     const msgInput   = document.getElementById('message-input');
+    const sidebar    = document.getElementById('sidebar');
+    const chatPanel  = document.getElementById('chat-panel');
 
     /* ================= МАСКА ТЕЛЕФОНА ================= */
     phoneInput.addEventListener('input', () => {
@@ -507,10 +537,11 @@
         card.style.display = 'none';
         app.classList.add('active');
         renderChats();
-        // На мобильном сначала показываем список
+        
+        // На телефоне сначала показываем только список чатов
         if (window.innerWidth <= 700) {
-            document.getElementById('sidebar').classList.add('show');
-            document.getElementById('chat-panel').classList.add('hide');
+            sidebar.classList.add('show');
+            chatPanel.classList.remove('show');
         }
     }
 
@@ -555,9 +586,18 @@
         renderMessages();
         renderChats(document.getElementById('search').value);
 
+        // На телефоне прячем список и показываем сам чат
         if (window.innerWidth <= 700) {
-            document.getElementById('sidebar').classList.remove('show');
-            document.getElementById('chat-panel').classList.remove('hide');
+            sidebar.classList.remove('show');
+            chatPanel.classList.add('show');
+        }
+    }
+
+    /* ================= КНОПКА НАЗАД (ДЛЯ ТЕЛЕФОНА) ================= */
+    function backToChats() {
+        if (window.innerWidth <= 700) {
+            chatPanel.classList.remove('show');
+            sidebar.classList.add('show');
         }
     }
 
