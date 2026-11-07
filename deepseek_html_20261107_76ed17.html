@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Telegram Web</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+    body {
+        background: #e6ebee;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    /* ---------- Карточка ---------- */
+    .card {
+        background: #fff;
+        width: 100%;
+        max-width: 400px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        padding: 40px 30px 30px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* ---------- Шапка с крестиком ---------- */
+    .top-bar {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+    }
+    .close-btn {
+        width: 32px;
+        height: 32px;
+        border: none;
+        background: transparent;
+        color: #a2acb4;
+        font-size: 22px;
+        cursor: pointer;
+        border-radius: 50%;
+        transition: background 0.15s;
+    }
+    .close-btn:hover { background: #f0f2f4; }
+
+    /* ---------- Иконка ---------- */
+    .logo {
+        width: 90px;
+        height: 90px;
+        margin: 0 auto 18px;
+    }
+    .logo svg { width: 100%; height: 100%; }
+
+    h1 {
+        font-size: 21px;
+        font-weight: 500;
+        color: #222;
+        text-align: center;
+        margin-bottom: 8px;
+    }
+    .subtitle {
+        font-size: 14px;
+        color: #707579;
+        text-align: center;
+        margin-bottom: 26px;
+        line-height: 1.4;
+    }
+
+    /* ---------- Поля ---------- */
+    .field {
+        position: relative;
+        margin-bottom: 18px;
+    }
+    .field input {
+        width: 100%;
+        padding: 15px 16px;
+        border: 1px solid #dadce0;
+        border-radius: 10px;
+        font-size: 16px;
+        outline: none;
+        transition: border-color 0.15s;
+        background: #fff;
+    }
+    .field input:focus { border-color: #3390ec; }
+    .field input.error { border-color: #e53935; }
+
+    /* Поле кода с разделителями */
+    .code-input {
+        width: 100%;
+        padding: 15px 16px;
+        border: 1px solid #dadce0;
+        border-radius: 10px;
+        font-size: 22px;
+        letter-spacing: 8px;
+        text-align: center;
+        outline: none;
+        transition: border-color 0.15s;
+    }
+    .code-input:focus { border-color: #3390ec; }
+    .code-input.error { border-color: #e53935; }
+
+    /* ---------- Кнопка ---------- */
+    .btn {
+        width: 100%;
+        padding: 14px;
+        background: #3390ec;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.15s;
+        margin-top: 6px;
+    }
+    .btn:hover { background: #2b7cd3; }
+    .btn:disabled { background: #a8c7e8; cursor: default; }
+
+    /* ---------- Ссылки ---------- */
+    .link-btn {
+        display: block;
+        width: 100%;
+        margin-top: 16px;
+        padding: 8px;
+        background: transparent;
+        border: none;
+        color: #3390ec;
+        font-size: 14px;
+        cursor: pointer;
+        text-align: center;
+    }
+    .link-btn:hover { text-decoration: underline; }
+
+    /* ---------- Шаги ---------- */
+    .step { display: none; animation: fade 0.25s ease; }
+    .step.active { display: block; }
+    @keyframes fade {
+        from { opacity: 0; transform: translateX(12px); }
+        to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ---------- Ошибка ---------- */
+    .error-text {
+        color: #e53935;
+        font-size: 13px;
+        margin: -8px 0 14px;
+        text-align: left;
+        display: none;
+    }
+    .error-text.show { display: block; }
+
+    /* ---------- Нижняя подпись ---------- */
+    .footnote {
+        margin-top: 22px;
+        font-size: 12px;
+        color: #a2acb4;
+        text-align: center;
+        line-height: 1.4;
+    }
+</style>
+</head>
+<body>
+
+<div class="card">
+    <div class="top-bar">
+        <button class="close-btn" title="Закрыть" onclick="alert('Это демонстрационная страница.')">×</button>
+    </div>
+
+    <!-- Логотип (общий для шагов) -->
+    <div class="logo">
+        <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="tg" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#37AEE2"/>
+                    <stop offset="100%" stop-color="#1E96C8"/>
+                </linearGradient>
+            </defs>
+            <circle cx="120" cy="120" r="120" fill="url(#tg)"/>
+            <path fill="#FFFFFF" d="M54.3 118.8l155.9-60.1c7.2-2.7 13.5 1.7 11.1 12.1l-26.5 125.1c-2 9-7.3 11.2-14.8 7l-40.9-30.2-19.7 19c-2.2 2.2-4 4-8.2 4l2.9-41.7 75.9-68.6c3.3-2.9-.7-4.5-5.1-1.6l-93.8 59.1-40.4-12.6c-8.8-2.8-9-8.8 1.6-12.1z"/>
+        </svg>
+    </div>
+
+    <!-- ШАГ 1: Ввод номера -->
+    <div class="step active" id="step-phone">
+        <h1>Вход в Telegram</h1>
+        <p class="subtitle">Введите номер телефона, чтобы<br>получить код подтверждения</p>
+
+        <div class="field">
+            <input type="tel" id="phone" placeholder="Номер телефона" autocomplete="tel">
+        </div>
+        <div class="error-text" id="phone-error">Введите корректный номер телефона</div>
+
+        <button class="btn" onclick="sendCode()">Получить код</button>
+        <div class="footnote">Демонстрационная страница. Данные никуда не отправляются.</div>
+    </div>
+
+    <!-- ШАГ 2: Ввод кода -->
+    <div class="step" id="step-code">
+        <h1>Введите код</h1>
+        <p class="subtitle" id="code-subtitle">Мы отправили код в Telegram</p>
+
+        <div class="field">
+            <input type="tel" inputmode="numeric" maxlength="5" class="code-input" id="code" placeholder="•••••" autocomplete="one-time-code">
+        </div>
+        <div class="error-text" id="code-error">Неверный код. Попробуйте ещё раз.</div>
+
+        <button class="btn" onclick="verifyCode()">Войти</button>
+        <button class="link-btn" onclick="goBack()">Изменить номер</button>
+    </div>
+</div>
+
+<script>
+    const phoneInput = document.getElementById('phone');
+    const codeInput  = document.getElementById('code');
+    const stepPhone  = document.getElementById('step-phone');
+    const stepCode   = document.getElementById('step-code');
+    const phoneError = document.getElementById('phone-error');
+    const codeError  = document.getElementById('code-error');
+    const codeSub    = document.getElementById('code-subtitle');
+
+    // Простая маска: +7 999 123-45-67
+    phoneInput.addEventListener('input', () => {
+        let digits = phoneInput.value.replace(/\D/g, '');
+        if (digits.startsWith('8')) digits = '7' + digits.slice(1);
+        if (!digits.startsWith('7') && digits.length > 0) digits = '7' + digits;
+
+        let out = '';
+        if (digits.length > 0) out = '+' + digits[0];
+        if (digits.length > 1) out += ' ' + digits.slice(1, 4);
+        if (digits.length > 4) out += ' ' + digits.slice(4, 7);
+        if (digits.length > 7) out += '-' + digits.slice(7, 9);
+        if (digits.length > 9) out += '-' + digits.slice(9, 11);
+
+        phoneInput.value = out;
+        phoneError.classList.remove('show');
+        phoneInput.classList.remove('error');
+    });
+
+    // Только цифры в коде
+    codeInput.addEventListener('input', () => {
+        codeInput.value = codeInput.value.replace(/\D/g, '').slice(0, 5);
+        codeError.classList.remove('show');
+        codeInput.classList.remove('error');
+    });
+
+    function sendCode() {
+        const digits = phoneInput.value.replace(/\D/g, '');
+        if (digits.length < 11) {
+            phoneError.classList.add('show');
+            phoneInput.classList.add('error');
+            return;
+        }
+
+        // Маска номера: +7 999 ***-**-67
+        const masked = '+7 ' + digits.slice(1,4) + ' ***-**-' + digits.slice(9,11);
+        codeSub.textContent = 'Мы отправили код в Telegram на номер ' + masked;
+
+        stepPhone.classList.remove('active');
+        stepCode.classList.add('active');
+        codeInput.value = '';
+        codeInput.focus();
+    }
+
+    function verifyCode() {
+        const code = codeInput.value;
+        if (code.length < 5) {
+            codeError.textContent = 'Код должен состоять из 5 цифр.';
+            codeError.classList.add('show');
+            codeInput.classList.add('error');
+            return;
+        }
+
+        // «Правильный» код для демо — 12345
+        if (code === '12345') {
+            stepCode.classList.remove('active');
+            stepCode.innerHTML = `
+                <h1 style="margin-top: 30px;">Добро пожаловать</h1>
+                <p class="subtitle">Это демонстрационная страница.<br>Настоящий вход не выполняется.</p>
+                <button class="btn" onclick="location.reload()">Начать заново</button>
+            `;
+        } else {
+            codeError.textContent = 'Неверный код. Попробуйте ещё раз.';
+            codeError.classList.add('show');
+            codeInput.classList.add('error');
+        }
+    }
+
+    function goBack() {
+        stepCode.classList.remove('active');
+        stepPhone.classList.add('active');
+        phoneInput.focus();
+    }
+</script>
+
+</body>
+</html>
